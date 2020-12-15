@@ -137,11 +137,14 @@ def learn(*, network, env, total_timesteps, eval_env=None, seed=None, nsteps=204
     # Start total timer
     tfirststart = time.perf_counter()
 
+    # For how many times we need to update the environment vector.
     nupdates = total_timesteps // nbatch
     for update in range(1, nupdates + 1):
         assert nbatch % nminibatches == 0
-        # Start timer
+
+        # Start timer for each update.
         tstart = time.perf_counter()
+        # The fraction for the updates to be done.
         frac = 1.0 - (update - 1.0) / nupdates
         # Calculate the learning rate
         lrnow = lr(frac)
