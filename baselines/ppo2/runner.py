@@ -46,7 +46,8 @@ class Runner(AbstractEnvRunner):
                 if maybeepinfo: epinfos.append(maybeepinfo)
             mb_rewards.append(rewards)
 
-        #batch of steps to batch of rollouts
+        # batch of steps to batch of rollouts.
+        # This convert mb_xxx from a list of nd_arrays to a pure nd-array with an extra axis.
         mb_obs = np.asarray(mb_obs, dtype=self.obs.dtype)
         mb_rewards = np.asarray(mb_rewards, dtype=np.float32)
         mb_actions = np.asarray(mb_actions)
@@ -69,6 +70,9 @@ class Runner(AbstractEnvRunner):
             delta = mb_rewards[t] + self.gamma * nextvalues * nextnonterminal - mb_values[t]
             mb_advs[t] = lastgaelam = delta + self.gamma * self.lam * nextnonterminal * lastgaelam
         mb_returns = mb_advs + mb_values
+
+        # Swap the 0 and 1 axis and flat them. This makes all experiences flatten without env and timestep dimensions.
+        # This also makes experiences from the same env stay together in sequence.
         return (*map(sf01, (mb_obs, mb_returns, mb_dones, mb_actions, mb_values, mb_neglogpacs)),
             mb_states, epinfos)
 
